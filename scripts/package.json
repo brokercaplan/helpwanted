@@ -1,0 +1,16 @@
+{
+  "name": "helpwanted-ingestion",
+  "version": "1.0.0",
+  "description": "Daily job data ingestion for Help Wanted app",
+  "type": "module",
+  "scripts": {
+    "ingest": "node ingest.js",
+    "test": "node ingest.js --dry-run"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
