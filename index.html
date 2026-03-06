@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help Wanted — Jobs Near You</title>
+  <meta name="description" content="Find jobs right where you are. The digital help wanted sign.">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+      *{margin:0;padding:0;box-sizing:border-box}
+      :root{
+            --green:#1a5c38;--green-light:#e8f5ee;--gold:#f0a500;
+            --ink:#1a1a1a;--gray:#6b7280;--border:#e5e7eb;
+            --card:#fff;--bg:#f9fafb;--red:#dc2626;
+      }
+      body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--ink);height:100vh;overflow:hidden}
+
+      /* ── HEADER ── */
+      header{display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;background:var(--green);color:#fff;z-index:1000;position:relative;flex-shrink:0}
+      .logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:18px;letter-spacing:-0.3px}
+      .logo-icon{width:32px;height:32px;background:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px}
+      .search-bar{display:flex;align-items:center;gap:8px;flex:1;max-width:480px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:6px 12px}
+      .search-bar input{background:none;border:none;outline:none;color:#fff;font-size:14px;flex:1;min-width:0}
+      .search-bar input::placeholder{color:rgba(255,255,255,0.65)}
+      .search-bar button{background:rgba(255,255,255,0.2);border:none;color:#fff;padding:4px 10px;border-radius:5px;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap}
+      .search-bar button:hover{background:rgba(255,255,255,0.35)}
+      .header-meta{margin-left:auto;font-size:13px;opacity:0.85}
+
+      /* ── LAYOUT ── */
+      .app{display:flex;height:calc(100vh - 56px)}
+
+      /* ── LEFT PANEL ── */
+      .panel{width:420px;flex-shrink:0;display:flex;flex-direction:column;background:#fff;border-right:1px solid var(--border);overflow:hidden}
+      .panel-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+      .result-count{font-size:14px;font-weight:600;color:var(--ink)}
+      .result-count span{color:var(--green)}
+      .sort-select{margin-left:auto;font-size:13px;border:1px solid var(--border);border-radius:6px;padding:4px 8px;background:#fff;cursor:pointer;outline:none}
+
+      /* filters */
+      .filters{display:flex;gap:6px;padding:10px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap;flex-shrink:0}
+      .filter-btn{background:#fff;border:1px solid var(--border);border-radius:20px;padding:5px 13px;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .15s}
+      .filter-btn:hover{border-color:var(--green);color:var(--green)}
+      .filter-btn.active{background:var(--green);color:#fff;border-color:var(--green)}
+      .radius-select{font-size:12px;border:1px solid var(--border);border-radius:20px;padding:5px 10px;background:#fff;cursor:pointer;outline:none}
+
+      /* job list */
+      .job-list{flex:1;overflow-y:auto;padding:8px 0}
+      .job-list::-webkit-scrollbar{width:4px}
+      .job-list::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:4px}
+
+      .job-card{padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;display:flex;gap:12px;align-items:flex-start}
+      .job-card:hover{background:#f0fdf4}
+      .job-card.selected{background:var(--green-light);border-left:3px solid var(--green)}
+
+      .job-logo{width:40px;height:40px;border-radius:8px;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:var(--green);flex-shrink:0;overflow:hidden}
+      .job-logo img{width:100%;height:100%;object-fit:contain;padding:4px}
+
+      .job-info{flex:1;min-width:0}
+      .job-title{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .job-company{font-size:13px;color:var(--gray);margin-bottom:4px}
+      .job-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+      .tag{font-size:11px;padding:2px 7px;border-radius:10px;font-weight:500}
+      .tag-pay{background:#fef3c7;color:#92400e}
+      .tag-type{background:#e0e7ff;color:#3730a3}
+      .tag-dist{background:#f0fdf4;color:#166534}
+      .tag-new{background:#fee2e2;color:#991b1b}
+
+      .no-results{text-align:center;padding:48px 24px;color:var(--gray)}
+      .no-results .icon{font-size:40px;margin-bottom:12px}
+
+      /* ── MAP ── */
+      #map{flex:1;z-index:0}
+
+      /* ── DETAIL DRAWER ── */
+      .detail-overlay{position:fixed;top:56px;left:0;width:420px;height:calc(100vh - 56px);background:#fff;z-index:500;transform:translateX(-100%);transition:transform .25s ease;display:flex;flex-direction:column;box-shadow:4px 0 20px rgba(0,0,0,.1)}
+      .detail-overlay.open{transform:translateX(0)}
+      .det-header{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+      .det-back{background:none;border:none;font-size:20px;cursor:pointer;color:var(--gray);padding:2px 6px;border-radius:4px}
+      .det-back:hover{background:var(--bg);color:var(--ink)}
+      .det-title{font-size:15px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .det-body{flex:1;overflow-y:auto;padding:16px}
+      .det-company-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+      .det-logo{width:48px;height:48px;border-radius:10px;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:var(--green);flex-shrink:0}
+      .det-company{font-size:15px;font-weight:600}
+      .det-location{font-size:13px;color:var(--gray)}
+      .det-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+      .stat-box{background:var(--bg);border-radius:8px;padding:10px 12px}
+      .stat-label{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+      .stat-value{font-size:14px;font-weight:600;color:var(--ink)}
+      .det-section{margin-bottom:14px}
+      .det-section h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--gray);margin-bottom:6px}
+      .det-desc{font-size:13px;line-height:1.65;color:#374151;max-height:200px;overflow-y:auto}
+      .det-footer{padding:14px 16px;border-top:1px solid var(--border);flex-shrink:0}
+      .apply-btn{display:block;width:100%;background:var(--green);color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;transition:background .15s}
+      .apply-btn:hover{background:#145a2e}
+      .apply-note{text-align:center;font-size:11px;color:var(--gray);margin-top:6px}
+
+      /* ── LOADING / TOAST ── */
+      .loading-bar{position:fixed;top:56px;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--green),var(--gold));z-index:9999;display:none}
+      .loading-bar.show{display:block;animation:loading 1.2s infinite}
+      @keyframes loading{0%{transform:scaleX(0);transform-origin:left}50%{transform:scaleX(0.7);transform-origin:left}100%{transform:scaleX(1);transform-origin:left}}
+
+      .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
+      .toast.show{opacity:1}
+
+      /* ── MAP PINS ── */
+      .map-pin{background:var(--green);color:#fff;border-radius:20px;padding:4px 9px;font-size:11px;font-weight:700;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.25);cursor:pointer;white-space:nowrap;transition:transform .1s}
+      .map-pin:hover,.map-pin.selected{transform:scale(1.15);background:var(--gold);color:var(--ink);z-index:1000!important}
+      .map-pin.urgent{background:var(--red)}
+
+      /* ── MOBILE ── */
+      @media(max-width:768px){
+            .panel{position:fixed;bottom:0;left:0;right:0;width:100%;height:55vh;z-index:400;border-top:3px solid var(--border);border-right:none;transform:translateY(calc(100% - 80px));transition:transform .3s;border-radius:16px 16px 0 0}
+            .panel.expanded{transform:translateY(0)}
+            .panel-handle{display:block!important;width:36px;height:4px;background:#d1d5db;border-radius:2px;margin:8px auto 4px}
+            .detail-overlay{width:100%;border-radius:0}
+            #map{position:fixed;top:56px;left:0;right:0;bottom:0}
+            .search-bar{max-width:none}
+            .header-meta{display:none}
+      }
+      .panel-handle{display:none}
+
+      /* ── EMPTY STATE ── */
+      .splash{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:24px;text-align:center}
+      .splash h2{font-size:20px;font-weight:700;margin:12px 0 6px;color:var(--ink)}
+      .splash p{font-size:14px;color:var(--gray);max-width:260px;line-height:1.5}
+      .splash-icon{font-size:48px}
+    </style>
+  </head>
+  <body>
+
+    <div class="loading-bar" id="loadingBar"></div>div>
+    <div class="toast" id="toast"></div>div>
+
+    <header>
+        <div class="logo">
+              <div class="logo-icon">🪧</div>div>
+              Help Wanted
+        </div>div>
+        <div class="search-bar">
+              <input type="text" id="locationInput" placeholder="City, zip code, or neighborhood..." autocomplete="off">
+              <button onclick="doSearch()">Search</button>button>
+        </div>div>
+        <div class="header-meta" id="headerMeta"></div>div>
+    </header>
+
+    <div class="app">
+        <!-- LEFT PANEL -->
+        <div class="panel" id="panel">
+              <div class="panel-handle" id="panelHandle"></div>div>
+              <div class="panel-header">
+                      <div class="result-count" id="resultCount">Enter a location to find jobs</div>div>
+                      <select class="sort-select" id="sortSelect" onchange="sortAndRender()">
+                                <option value="distance">Closest first</option>option>
+                                <option value="newest">Newest first</option>option>
+                                <option value="pay_high">Pay: High to low</option>option>
+                                <option value="pay_low">Pay: Low to high</option>option>
+                      </select>select>
+              </div>div>
+              <div class="filters" id="filters">
+                      <button class="filter-btn active" data-type="all" onclick="setFilter(this,'all')">All</button>button>
+                      <button class="filter-btn" data-type="Full-time" onclick="setFilter(this,'Full-time')">Full-time</button>button>
+                      <button class="filter-btn" data-type="Part-time" onclick="setFilter(this,'Part-time')">Part-time</button>button>
+                      <button class="filter-btn" data-type="Contract" onclick="setFilter(this,'Contract')">Contract</button>button>
+                      <select class="radius-select" id="radiusSelect" onchange="doSearch()">
+                                <option value="5">5 mi</option>option>
+                                <option value="10" selected>10 mi</option>option>
+                                <option value="25">25 mi</option>option>
+                                <option value="50">50 mi</option>option>
+                      </select>select>
+              </div>div>
+              <div class="job-list" id="jobList">
+                      <div class="splash">
+                                <div class="splash-icon">🪧</div>div>
+                                <h2>Find jobs near you</h2>
+                              <p>Enter a zip code or city above, or let us use your location</p>
+                              <button style="margin-top:16px;background:var(--green);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:14px;cursor:pointer;font-weight:600" onclick="useGPS()">📍 Use My Location</button>button>
+                      </div>div>
+              </div>div>
+        </div>div>
+    
+      <!-- MAP -->
+      <div id="map"></div>div>
+    </div>div>
+  
+  <!-- DETAIL DRAWER -->
+  <div class="detail-overlay" id="detailOverlay">
+    <div class="det-header">
+        <button class="det-back" onclick="closeDetail()">←</button>button>
+        <div class="det-title" id="detTitle"></div>div>
+    </div>div>
+    <div class="det-body" id="detBody"></div>div>
+    <div class="det-footer">
+        <a class="apply-btn" id="applyBtn" href="#" target="_blank" rel="noopener">Apply Now →</a>a>
+        <div class="apply-note">You'll be taken to the original job posting</div>div>
+    </div>div>
+  </div>div>
+  
+  <script>
+    const API = 'https://helpwanted-api.broker-015.workers.dev';
+    let map, allJobs = [], filteredJobs = [], markers = [], activeFilter = 'all', selectedId = null, searchCoords = null;
+
+    // ── MAP INIT ──
+    function initMap(lat=25.7617, lng=-80.1918){
+        if(map){ map.setView([lat,lng],13); return; }
+        map = L.map('map',{zoomControl:true}).setView([lat,lng],13);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
+              attribution:'© OpenStreetMap © CARTO',maxZoom:19
+        }).addTo(map);
+        map.on('click', ()=>{ if(window.innerWidth>768) closeDetail(); });
+    }
+
+    // ── SEARCH ──
+    async function doSearch(){
+        const q = document.getElementById('locationInput').value.trim();
+        if(!q){ useGPS(); return; }
+        showLoading(true);
+        try{
+              // geocode
+              const geo = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q+', USA')}&limit=1`,{headers:{'Accept-Language':'en'}});
+              const gd = await geo.json();
+              if(!gd.length){ showToast('Location not found. Try a zip code or city.'); showLoading(false); return; }
+              const lat=parseFloat(gd[0].lat), lng=parseFloat(gd[0].lon);
+              searchCoords={lat,lng};
+              initMap(lat,lng);
+              await fetchJobs(lat,lng);
+        }catch(e){ showToast('Search failed. Please try again.'); }
+        showLoading(false);
+    }
+
+    async function useGPS(){
+        if(!navigator.geolocation){ showToast('Geolocation not available'); return; }
+        showLoading(true);
+        showToast('Getting your location...');
+        navigator.geolocation.getCurrentPosition(async pos=>{
+              const {latitude:lat,longitude:lng}=pos.coords;
+              searchCoords={lat,lng};
+              // reverse geocode for display
+              try{
+                      const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+                      const d=await r.json();
+                      const zip=d.address?.postcode||'';
+                      const city=d.address?.city||d.address?.town||d.address?.suburb||'';
+                      document.getElementById('locationInput').value=zip||city||'My Location';
+              }catch(e){}
+              initMap(lat,lng);
+              await fetchJobs(lat,lng);
+              showLoading(false);
+        }, err=>{
+              showToast('Could not get location. Please enter a zip code.');
+              showLoading(false);
+        },{enableHighAccuracy:true,timeout:10000});
+    }
+
+    async function fetchJobs(lat,lng){
+        const radius=document.getElementById('radiusSelect').value;
+        showLoading(true);
+        try{
+              const res=await fetch(`${API}/api/jobs?lat=${lat}&lng=${lng}&radius=${radius}&limit=100`);
+              if(!res.ok) throw new Error('API error');
+              const data=await res.json();
+              allJobs=(data.jobs||[]).map(j=>enrichJob(j,lat,lng));
+              applyFilter();
+              fitMapToBounds();
+        }catch(e){
+              // fallback: try zip
+              try{
+                      const zipRes=await fetch(`${API}/api/meta`);
+                      const meta=await zipRes.json();
+                      if(meta&&meta.totalJobs>0) showToast('Loaded from database');
+                      // try searching by zip via /api/jobs
+                      const fallback=await fetch(`${API}/api/jobs?lat=${lat}&lng=${lng}&radius=25&limit=100`);
+                      const fd=await fallback.json();
+                      allJobs=(fd.jobs||[]).map(j=>enrichJob(j,lat,lng));
+                      applyFilter();
+              }catch(e2){
+                      showToast('Could not load jobs. Check connection.');
+              }
+        }
+        showLoading(false);
+    }
+
+    function enrichJob(j,userLat,userLng){
+        if(j.lat&&j.lng&&userLat&&userLng){
+              j.distanceMiles=haversine(userLat,userLng,j.lat,j.lng);
+        }
+        return j;
+    }
+
+    function haversine(lat1,lng1,lat2,lng2){
+        const R=3959,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;
+        const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+        return Math.round(2*R*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))*10)/10;
+    }
+
+    // ── FILTER & SORT ──
+    function setFilter(btn,type){
+        document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        activeFilter=type;
+        applyFilter();
+    }
+
+    function applyFilter(){
+        filteredJobs=activeFilter==='all'?allJobs:allJobs.filter(j=>j.jobType===activeFilter);
+        sortAndRender();
+    }
+
+    function sortAndRender(){
+        const s=document.getElementById('sortSelect').value;
+        filteredJobs=[...filteredJobs];
+        if(s==='distance') filteredJobs.sort((a,b)=>(a.distanceMiles||999)-(b.distanceMiles||999));
+        else if(s==='newest') filteredJobs.sort((a,b)=>new Date(b.postedAt)-new Date(a.postedAt));
+        else if(s==='pay_high') filteredJobs.sort((a,b)=>(b.salaryMax||b.salaryMin||0)-(a.salaryMax||a.salaryMin||0));
+        else if(s==='pay_low') filteredJobs.sort((a,b)=>(a.salaryMin||a.salaryMax||999999)-(b.salaryMin||b.salaryMax||999999));
+        renderList();
+        renderMarkers();
+        updateCount();
+    }
+
+    // ── RENDER LIST ──
+    function renderList(){
+        const list=document.getElementById('jobList');
+        if(!filteredJobs.length){
+              list.innerHTML=`<div class="no-results"><div class="icon">🔍</div><p>No jobs found in this area.<br>Try increasing the radius.</p></div>`;
+              return;
+        }
+        list.innerHTML=filteredJobs.map((j,i)=>`
+            <div class="job-card${j.id===selectedId?' selected':''}" onclick="selectJob('${j.id}',${i})">
+                  <div class="job-logo">${logoHtml(j)}</div>
+                        <div class="job-info">
+                                <div class="job-title">${esc(j.title)}</div>
+                                        <div class="job-company">${esc(j.company)}</div>
+                                                <div class="job-meta">
+                                                          ${j.salaryText?`<span class="tag tag-pay">💰 ${esc(j.salaryText)}</span>`:''}
+                                                                    <span class="tag tag-type">${esc(j.jobType||'Full-time')}</span>
+                                                                              ${j.distanceMiles!=null?`<span class="tag tag-dist">📍 ${j.distanceMiles} mi</span>`:''}
+                                                                                        ${isNew(j.postedAt)?`<span class="tag tag-new">NEW</span>`:''}
+                                                                                                </div>
+                                                                                                      </div>
+                                                                                                          </div>`).join('');
+    }
+
+    function logoHtml(j){
+        const initial=(j.company||'?')[0].toUpperCase();
+        return `<span>${initial}</span>`;
+    }
+
+    function isNew(dateStr){
+        if(!dateStr) return false;
+        return (Date.now()-new Date(dateStr))/(1000*60*60)<48;
+    }
+
+    // ── RENDER MARKERS ──
+    function renderMarkers(){
+        if(!map) return;
+        markers.forEach(m=>map.removeLayer(m));
+        markers=[];
+        filteredJobs.forEach((j,i)=>{
+              if(!j.lat||!j.lng) return;
+              const el=document.createElement('div');
+              el.className=`map-pin${j.id===selectedId?' selected':''}`;
+              el.textContent=j.salaryText?j.salaryText.split(' ')[0]:j.company.substring(0,8);
+              const m=L.marker([j.lat,j.lng],{icon:L.divIcon({html:el,className:'',iconAnchor:[0,0]})}).addTo(map);
+              m.on('click',()=>selectJob(j.id,i));
+              markers.push(m);
+        });
+    }
+
+    function fitMapToBounds(){
+        const pts=filteredJobs.filter(j=>j.lat&&j.lng).map(j=>[j.lat,j.lng]);
+        if(pts.length>1&&map) map.fitBounds(pts,{padding:[40,40],maxZoom:14});
+    }
+
+    // ── SELECT JOB ──
+    function selectJob(id,idx){
+        selectedId=id;
+        const j=filteredJobs[idx]||allJobs.find(x=>x.id===id);
+        if(!j) return;
+        // highlight card
+        document.querySelectorAll('.job-card').forEach(c=>c.classList.remove('selected'));
+        document.querySelectorAll('.job-card')[idx]?.classList.add('selected');
+        // pan map
+        if(j.lat&&j.lng&&map) map.panTo([j.lat,j.lng]);
+        // open detail
+        openDetail(j);
+        // mobile: collapse panel
+        if(window.innerWidth<=768) document.getElementById('panel').classList.remove('expanded');
+    }
+
+    function openDetail(j){
+        document.getElementById('detTitle').textContent=j.title;
+        document.getElementById('applyBtn').href=j.applyUrl||'#';
+        const daysAgo=j.postedAt?Math.floor((Date.now()-new Date(j.postedAt))/(1000*60*60*24)):null;
+        const posted=daysAgo===0?'Today':daysAgo===1?'Yesterday':(daysAgo!=null?`${daysAgo} days ago`:'Recently');
+        document.getElementById('detBody').innerHTML=`
+            <div class="det-company-row">
+                  <div class="det-logo">${(j.company||'?')[0].toUpperCase()}</div>
+                        <div>
+                                <div class="det-company">${esc(j.company)}</div>
+                                        <div class="det-location">📍 ${esc(j.locationRaw||j.city||'Location varies')}</div>
+                                              </div>
+                                                  </div>
+                                                      <div class="det-stats">
+                                                            <div class="stat-box"><div class="stat-label">Pay</div><div class="stat-value">${j.salaryText||'See listing'}</div></div>
+                                                                  <div class="stat-box"><div class="stat-label">Type</div><div class="stat-value">${esc(j.jobType||'Full-time')}</div></div>
+                                                                        <div class="stat-box"><div class="stat-label">Distance</div><div class="stat-value">${j.distanceMiles!=null?j.distanceMiles+' mi':'—'}</div></div>
+                                                                              <div class="stat-box"><div class="stat-label">Posted</div><div class="stat-value">${posted}</div></div>
+                                                                                  </div>
+                                                                                      ${j.description?`<div class="det-section"><h4>About this role</h4><div class="det-desc">${esc(j.description)}</div></div>`:''}
+                                                                                        `;
+        document.getElementById('detailOverlay').classList.add('open');
+    }
+
+    function closeDetail(){
+        document.getElementById('detailOverlay').classList.remove('open');
+        selectedId=null;
+        document.querySelectorAll('.job-card').forEach(c=>c.classList.remove('selected'));
+    }
+
+    // ── COUNT ──
+    function updateCount(){
+        const el=document.getElementById('resultCount');
+        const total=filteredJobs.length;
+        if(total===0) el.innerHTML='No jobs found';
+        else el.innerHTML=`<span>${total}</span> job${total===1?'':'s'} found`;
+        document.getElementById('headerMeta').textContent=searchCoords&&total?`${total} jobs near you`:'';
+    }
+
+    // ── HELPERS ──
+    function showLoading(on){document.getElementById('loadingBar').classList.toggle('show',on)}
+    function showToast(msg,ms=3000){
+        const t=document.getElementById('toast');
+        t.textContent=msg;t.classList.add('show');
+        setTimeout(()=>t.classList.remove('show'),ms);
+    }
+    function esc(s){
+        if(!s) return '';
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── MOBILE PANEL DRAG ──
+    const panel=document.getElementById('panel');
+    const handle=document.getElementById('panelHandle');
+    handle.addEventListener('click',()=>panel.classList.toggle('expanded'));
+
+    // ── KEYBOARD ──
+    document.getElementById('locationInput').addEventListener('keydown',e=>{if(e.key==='Enter') doSearch();});
+
+    // ── INIT ──
+    initMap();
+
+    // try to load meta info
+    fetch(`${API}/api/meta`).then(r=>r.json()).then(meta=>{
+        if(meta&&meta.totalJobs){
+              showToast(`📊 ${meta.totalJobs.toLocaleString()} jobs in database — enter a location to search`);
+        }
+    }).catch(()=>{});
+  </script>
+  </body>
+</html>html>
+  </script></p></h2>
+    </header>
+  </body>
+  </style></title>
+  </head>
