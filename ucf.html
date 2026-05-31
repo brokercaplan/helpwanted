@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UCF Class Tracker</title>
+<style>
+:root {
+  --gold: #FFC904;
+  --gold-dark: #d9a800;
+  --black: #1a1a1a;
+  --ucf-black: #231F20;
+  --bg: #f2f3f5;
+  --card: #ffffff;
+  --border: #e0e2e8;
+  --text: #1a1a1a;
+  --muted: #6b7280;
+  --open:       #16a34a; --open-bg:       #dcfce7; --open-border:       #86efac;
+  --waitlist:   #d97706; --waitlist-bg:   #fef3c7; --waitlist-border:   #fcd34d;
+  --closed:     #dc2626; --closed-bg:     #fee2e2; --closed-border:     #fca5a5;
+  --registered: #2563eb; --registered-bg: #dbeafe; --registered-border: #93c5fd;
+  --unknown:    #6b7280; --unknown-bg:    #f3f4f6; --unknown-border:    #d1d5db;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+header {
+  background: var(--ucf-black);
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  box-shadow: 0 2px 8px rgba(0,0,0,.35);
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 17px;
+  color: #fff;
+  text-decoration: none;
+}
+.logo-badge {
+  background: var(--gold);
+  color: var(--ucf-black);
+  padding: 3px 9px;
+  border-radius: 5px;
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: .5px;
+}
+.header-term {
+  margin-left: auto;
+  font-size: 13px;
+  color: rgba(255,255,255,.65);
+  font-weight: 500;
+}
+
+/* ── LAYOUT ── */
+main { max-width: 980px; margin: 0 auto; padding: 24px 16px 60px; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--card);
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+/* ── INPUTS ── */
+.form-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 12px; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+
+select, input[type="text"] {
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 11px;
+  font-size: 14px;
+  background: #fff;
+  color: var(--text);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  cursor: pointer;
+}
+select:focus, input[type="text"]:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(255,201,4,.2);
+}
+
+textarea {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13.5px;
+  font-family: 'SF Mono', 'Fira Mono', 'Consolas', monospace;
+  resize: vertical;
+  outline: none;
+  background: #fafafa;
+  color: var(--text);
+  min-height: 96px;
+  line-height: 1.6;
+  transition: border-color .15s, box-shadow .15s;
+}
+textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,201,4,.2); background: #fff; }
+textarea::placeholder { color: #bbb; }
+
+/* ── BUTTONS ── */
+.btn {
+  border: none; border-radius: 8px; padding: 8px 16px;
+  font-size: 13.5px; font-weight: 600; cursor: pointer;
+  transition: all .15s; display: inline-flex; align-items: center;
+  gap: 5px; white-space: nowrap; text-decoration: none;
+}
+.btn-gold   { background: var(--gold); color: var(--ucf-black); }
+.btn-gold:hover { background: var(--gold-dark); }
+.btn-ghost  { background: #fff; color: var(--text); border: 1.5px solid var(--border); }
+.btn-ghost:hover { background: #f5f5f5; border-color: #bbb; }
+.btn-danger { background: #fff; color: var(--closed); border: 1.5px solid var(--closed-border); }
+.btn-danger:hover { background: var(--closed-bg); }
+.btn-sm     { padding: 5px 11px; font-size: 12px; border-radius: 6px; }
+
+/* ── SUMMARY CHIPS ── */
+.summary-row { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.chip {
+  padding: 5px 13px; border-radius: 20px; font-size: 12.5px;
+  font-weight: 700; cursor: pointer; transition: all .15s;
+  border: 2px solid transparent; user-select: none;
+}
+.chip:hover { opacity: .85; }
+.chip.active { border-color: var(--black) !important; }
+.chip-all      { background: var(--ucf-black); color: #fff; }
+.chip-open     { background: var(--open-bg);       color: var(--open);       border-color: var(--open-border); }
+.chip-waitlist { background: var(--waitlist-bg);   color: var(--waitlist);   border-color: var(--waitlist-border); }
+.chip-closed   { background: var(--closed-bg);     color: var(--closed);     border-color: var(--closed-border); }
+.chip-registered { background: var(--registered-bg); color: var(--registered); border-color: var(--registered-border); }
+.chip-unknown  { background: var(--unknown-bg);    color: var(--unknown);    border-color: var(--unknown-border); }
+
+/* ── ACTION BAR ── */
+.action-bar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;
+}
+.filter-info { font-size: 12.5px; color: var(--muted); }
+.action-bar-right { margin-left: auto; display: flex; gap: 7px; }
+
+/* ── COURSE CARDS ── */
+.course-list { display: flex; flex-direction: column; gap: 7px; }
+
+.course-card {
+  background: var(--card);
+  border-radius: 10px;
+  padding: 11px 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.07);
+  border-left: 5px solid var(--unknown-border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: box-shadow .15s, border-color .15s;
+}
+.course-card:hover { box-shadow: 0 3px 10px rgba(0,0,0,.11); }
+.course-card[data-status="open"]       { border-left-color: var(--open); }
+.course-card[data-status="waitlist"]   { border-left-color: var(--waitlist); }
+.course-card[data-status="closed"]     { border-left-color: var(--closed); }
+.course-card[data-status="registered"] { border-left-color: var(--registered); }
+.course-card[data-status="unknown"]    { border-left-color: var(--unknown-border); }
+
+.course-code {
+  font-size: 16px; font-weight: 800;
+  font-family: 'SF Mono', 'Fira Mono', 'Consolas', monospace;
+  min-width: 92px; color: var(--black); letter-spacing: -.3px;
+}
+
+/* status toggle button */
+.status-pill {
+  padding: 4px 11px; border-radius: 20px; font-size: 11.5px; font-weight: 700;
+  cursor: pointer; border: 2px solid transparent; min-width: 110px;
+  text-align: center; transition: all .15s; user-select: none;
+  text-transform: uppercase; letter-spacing: .4px;
+}
+.status-pill[data-s="unknown"]    { background: var(--unknown-bg);    color: var(--unknown);    border-color: var(--unknown-border); }
+.status-pill[data-s="open"]       { background: var(--open-bg);       color: var(--open);       border-color: var(--open-border); }
+.status-pill[data-s="waitlist"]   { background: var(--waitlist-bg);   color: var(--waitlist);   border-color: var(--waitlist-border); }
+.status-pill[data-s="closed"]     { background: var(--closed-bg);     color: var(--closed);     border-color: var(--closed-border); }
+.status-pill[data-s="registered"] { background: var(--registered-bg); color: var(--registered); border-color: var(--registered-border); }
+.status-pill:hover { filter: brightness(.94); }
+
+.sections-input {
+  border: 1.5px solid var(--border); border-radius: 6px; padding: 4px 8px;
+  font-size: 12px; width: 56px; text-align: center; outline: none; background: #fafafa;
+  transition: border-color .15s;
+}
+.sections-input:focus { border-color: var(--gold); background: #fff; }
+
+.notes-input {
+  flex: 1; border: 1.5px solid transparent; border-radius: 6px; padding: 5px 8px;
+  font-size: 13px; color: #555; background: transparent; outline: none;
+  font-family: inherit; transition: all .15s; min-width: 0;
+}
+.notes-input:hover, .notes-input:focus { border-color: var(--border); background: #fafafa; }
+.notes-input::placeholder { color: #ccc; }
+
+.ucf-search-btn {
+  background: var(--gold); color: var(--ucf-black); border: none; border-radius: 6px;
+  padding: 5px 10px; font-size: 11.5px; font-weight: 700; cursor: pointer;
+  white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center;
+  gap: 4px; transition: background .15s;
+}
+.ucf-search-btn:hover { background: var(--gold-dark); }
+
+.remove-btn {
+  background: none; border: none; color: #d1d5db; cursor: pointer; font-size: 20px;
+  padding: 2px 4px; border-radius: 4px; transition: color .15s; line-height: 1;
+  flex-shrink: 0;
+}
+.remove-btn:hover { color: var(--closed); }
+
+/* ── EMPTY STATE ── */
+.empty {
+  text-align: center; padding: 48px 20px; color: var(--muted);
+}
+.empty-icon { font-size: 40px; margin-bottom: 12px; }
+.empty h3   { font-size: 17px; color: #444; margin-bottom: 6px; }
+.empty p    { font-size: 13.5px; }
+
+/* ── HELP SECTION ── */
+.help-row {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.help-pill {
+  background: var(--unknown-bg); border-radius: 6px;
+  padding: 5px 10px; font-size: 12px; color: var(--muted);
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 22px; right: 22px; background: #1a1a1a; color: #fff;
+  padding: 9px 16px; border-radius: 8px; font-size: 13.5px; z-index: 999;
+  opacity: 0; transform: translateY(8px); transition: all .22s; pointer-events: none;
+  box-shadow: 0 4px 14px rgba(0,0,0,.25);
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+  .course-card { flex-wrap: wrap; }
+  .course-code { font-size: 14px; min-width: 78px; }
+  .sections-input { display: none; }
+  .action-bar-right { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="#">
+    <span class="logo-badge">UCF</span>
+    Class Tracker
+  </a>
+  <span class="header-term" id="headerTerm"></span>
+</header>
+
+<main>
+
+  <!-- ── ADD COURSES ── -->
+  <div class="card">
+    <div class="card-title">📋 Add Courses</div>
+    <div class="form-row">
+      <div class="field">
+        <label>Term</label>
+        <select id="termSelect" style="min-width:190px">
+          <option value="2265">Summer 2026</option>
+          <option value="2268" selected>Fall 2026</option>
+          <option value="2271">Spring 2027</option>
+          <option value="2261">Spring 2026</option>
+          <option value="2258">Fall 2025</option>
+          <option value="2255">Summer 2025</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:12px">
+      <label>Course Numbers — one per line (e.g. COP3330, MAC 2311, PHY2048C)</label>
+      <textarea id="courseInput"
+        placeholder="COP3330&#10;MAC2311&#10;PHY2048C&#10;BSC1010&#10;ENC1101..."></textarea>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button class="btn btn-gold" onclick="addCourses()">+ Add Courses</button>
+      <button class="btn btn-ghost" onclick="openAllSearches()" title="Opens each course in UCF's class search in separate tabs">🔗 Open All in UCF</button>
+      <button class="btn btn-ghost" onclick="exportList()">📋 Copy Summary</button>
+      <button class="btn btn-danger btn-sm" onclick="clearAll()" style="margin-left:auto">🗑 Clear All</button>
+    </div>
+
+    <div class="help-row">
+      <span class="help-pill">Ctrl+Enter to add</span>
+      <span class="help-pill">Click a status pill to cycle it</span>
+      <span class="help-pill">Click a summary chip to filter</span>
+      <span class="help-pill">🔍 opens UCF class search in a new tab</span>
+    </div>
+  </div>
+
+  <!-- ── SUMMARY ── -->
+  <div class="summary-row" id="summaryRow"></div>
+
+  <!-- ── ACTION BAR ── -->
+  <div class="action-bar">
+    <span class="filter-info" id="filterInfo"></span>
+    <div class="action-bar-right">
+      <button class="btn btn-ghost btn-sm" onclick="sortByStatus()">Sort by status</button>
+      <button class="btn btn-ghost btn-sm" onclick="resetStatuses()">Reset all statuses</button>
+    </div>
+  </div>
+
+  <!-- ── COURSE LIST ── -->
+  <div class="course-list" id="courseList"></div>
+
+  <div class="empty" id="emptyState" style="display:none">
+    <div class="empty-icon">📚</div>
+    <h3 id="emptyTitle">No courses added yet</h3>
+    <p id="emptyDesc">Type or paste course numbers above and click <strong>Add Courses</strong></p>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONSTANTS ──────────────────────────────────────────────────────────────
+const TERMS = {
+  '2258': 'Fall 2025',
+  '2255': 'Summer 2025',
+  '2261': 'Spring 2026',
+  '2265': 'Summer 2026',
+  '2268': 'Fall 2026',
+  '2271': 'Spring 2027',
+};
+
+const STATUSES  = ['unknown', 'open', 'waitlist', 'closed', 'registered'];
+const STATUS_ICON = { unknown: '?', open: '✓', waitlist: '⏳', closed: '✗', registered: '★' };
+const STATUS_LABEL = { unknown: 'Unknown', open: 'Open', waitlist: 'Waitlist', closed: 'Full/Closed', registered: 'Registered' };
+const SORT_ORDER   = { registered: 0, open: 1, waitlist: 2, unknown: 3, closed: 4 };
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let courses = [];
+let activeTerm = '2268';
+let activeFilter = 'all';
+
+// ── PERSISTENCE ───────────────────────────────────────────────────────────
+const LS_KEY = 'ucf-class-tracker-v2';
+
+function save() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify({ courses, activeTerm })); } catch(e) {}
+}
+
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+    courses    = d.courses    || [];
+    activeTerm = d.activeTerm || '2268';
+  } catch(e) {}
+}
+
+// ── PARSE COURSE NUMBER ────────────────────────────────────────────────────
+function parseCourse(raw) {
+  const s = raw.trim().toUpperCase().replace(/\s+/g, '');
+  if (!s) return null;
+  const m = s.match(/^([A-Z]{2,4})(\d{4}[A-Z]?)$/);
+  if (m) return { code: s, subject: m[1], number: m[2] };
+  if (s.length >= 5) {
+    const letters = s.match(/^[A-Z]+/)?.[0] || '';
+    const digits  = s.slice(letters.length);
+    if (letters.length >= 2 && /^\d{4}/.test(digits))
+      return { code: s, subject: letters, number: digits };
+  }
+  return null;
+}
+
+// ── URLS ───────────────────────────────────────────────────────────────────
+// Opens the UCF authenticated portal class search for a given course.
+// PeopleSoft accepts these URL params to pre-populate the search form.
+function ucfSearchURL(course) {
+  const base = 'https://csprod-ss.net.ucf.edu/psc/CSPROD/EMPLOYEE/SA/c/COMMUNITY_ACCESS.CLASS_SEARCH.GBL';
+  const p = new URLSearchParams({
+    Page: 'CLASS_SEARCH',
+    Action: 'U',
+    STRM: activeTerm,
+    SUBJECT: course.subject,
+    CATALOG_NBR: course.number,
+  });
+  return `${base}?${p}`;
+}
+
+// Public guest access (no login required) as fallback.
+function ucfGuestURL(course) {
+  const base = 'https://my.ucf.edu/psp/IHPROD/GUEST/CSPROD/c/COMMUNITY_ACCESS.CLASS_SEARCH.GBL';
+  const p = new URLSearchParams({
+    Page: 'CLASS_SEARCH',
+    Action: 'U',
+    STRM: activeTerm,
+    SUBJECT: course.subject,
+    CATALOG_NBR: course.number,
+  });
+  return `${base}?${p}`;
+}
+
+// ── ADD COURSES ────────────────────────────────────────────────────────────
+function addCourses() {
+  const raw = document.getElementById('courseInput').value;
+  const lines = raw.split(/[\n,;]+/);
+  let added = 0, dupes = 0, bad = 0;
+
+  lines.forEach(line => {
+    const c = parseCourse(line);
+    if (!c) { if (line.trim()) bad++; return; }
+    if (courses.some(x => x.code === c.code)) { dupes++; return; }
+    courses.push({ ...c, status: 'unknown', notes: '', sections: '', id: Date.now() + Math.random() });
+    added++;
+  });
+
+  document.getElementById('courseInput').value = '';
+  save();
+  render();
+
+  const parts = [];
+  if (added)  parts.push(`${added} course${added !== 1 ? 's' : ''} added`);
+  if (dupes)  parts.push(`${dupes} duplicate${dupes !== 1 ? 's' : ''} skipped`);
+  if (bad)    parts.push(`${bad} unrecognized`);
+  toast(parts.join(' · ') || 'Nothing to add');
+}
+
+// ── REMOVE ─────────────────────────────────────────────────────────────────
+function removeCourse(code) {
+  courses = courses.filter(c => c.code !== code);
+  save(); render();
+}
+
+// ── STATUS CYCLE ───────────────────────────────────────────────────────────
+function cycleStatus(code) {
+  const c = courses.find(x => x.code === code);
+  if (!c) return;
+  c.status = STATUSES[(STATUSES.indexOf(c.status) + 1) % STATUSES.length];
+  save(); render();
+}
+
+// ── NOTES / SECTIONS ──────────────────────────────────────────────────────
+function setNotes(code, val) {
+  const c = courses.find(x => x.code === code); if (c) c.notes = val; save();
+}
+function setSections(code, val) {
+  const c = courses.find(x => x.code === code); if (c) c.sections = val; save();
+}
+
+// ── OPEN ALL ───────────────────────────────────────────────────────────────
+function openAllSearches() {
+  const list = visibleCourses();
+  if (!list.length) { toast('No courses to open'); return; }
+  if (list.length > 12 && !confirm(`Open ${list.length} tabs? Your browser may block some.`)) return;
+  list.forEach(c => window.open(ucfSearchURL(c), '_blank'));
+}
+
+// ── CLEAR ──────────────────────────────────────────────────────────────────
+function clearAll() {
+  if (!courses.length) return;
+  if (!confirm('Remove all courses?')) return;
+  courses = []; activeFilter = 'all'; save(); render(); toast('Cleared');
+}
+
+// ── SORT ───────────────────────────────────────────────────────────────────
+function sortByStatus() {
+  courses.sort((a, b) => (SORT_ORDER[a.status] ?? 3) - (SORT_ORDER[b.status] ?? 3));
+  save(); render(); toast('Sorted by status');
+}
+
+// ── RESET ──────────────────────────────────────────────────────────────────
+function resetStatuses() {
+  courses.forEach(c => c.status = 'unknown');
+  save(); render(); toast('All statuses reset');
+}
+
+// ── EXPORT ─────────────────────────────────────────────────────────────────
+function exportList() {
+  if (!courses.length) { toast('No courses to copy'); return; }
+  const term = TERMS[activeTerm] || activeTerm;
+  const lines = [`UCF Class Status — ${term}`, ''];
+  const groups = ['registered', 'open', 'waitlist', 'unknown', 'closed'];
+  groups.forEach(s => {
+    const group = courses.filter(c => c.status === s);
+    if (!group.length) return;
+    lines.push(`── ${STATUS_ICON[s]} ${STATUS_LABEL[s].toUpperCase()} ──`);
+    group.forEach(c => {
+      const extra = [c.sections && `${c.sections} sections`, c.notes].filter(Boolean).join(' — ');
+      lines.push(`  ${c.code}${extra ? '  ' + extra : ''}`);
+    });
+    lines.push('');
+  });
+  navigator.clipboard.writeText(lines.join('\n'))
+    .then(() => toast('Copied to clipboard ✓'))
+    .catch(() => toast('Copy failed — try selecting manually'));
+}
+
+// ── FILTER ─────────────────────────────────────────────────────────────────
+function setFilter(s) {
+  activeFilter = (activeFilter === s) ? 'all' : s;
+  render();
+}
+
+function visibleCourses() {
+  return activeFilter === 'all' ? courses : courses.filter(c => c.status === activeFilter);
+}
+
+// ── TOAST ──────────────────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function render() {
+  // Header term
+  document.getElementById('headerTerm').textContent = TERMS[activeTerm] || '';
+
+  // Sync term select
+  document.getElementById('termSelect').value = activeTerm;
+
+  // Counts
+  const cnt = { open: 0, waitlist: 0, closed: 0, registered: 0, unknown: 0 };
+  courses.forEach(c => cnt[c.status] = (cnt[c.status] || 0) + 1);
+
+  // Summary chips
+  document.getElementById('summaryRow').innerHTML = [
+    ['all',        'chip-all',        `📚 All: ${courses.length}`],
+    ['open',       'chip-open',       `✓ Open: ${cnt.open}`],
+    ['waitlist',   'chip-waitlist',   `⏳ Waitlist: ${cnt.waitlist}`],
+    ['closed',     'chip-closed',     `✗ Closed: ${cnt.closed}`],
+    ['registered', 'chip-registered', `★ Registered: ${cnt.registered}`],
+    ['unknown',    'chip-unknown',    `? Unknown: ${cnt.unknown}`],
+  ].map(([key, cls, label]) =>
+    `<div class="chip ${cls}${activeFilter === key ? ' active' : ''}" onclick="setFilter('${key}')">${label}</div>`
+  ).join('');
+
+  // Visible courses
+  const visible = visibleCourses();
+
+  // Filter info
+  document.getElementById('filterInfo').textContent =
+    activeFilter === 'all'
+      ? `${courses.length} course${courses.length !== 1 ? 's' : ''} total`
+      : `Showing: ${STATUS_LABEL[activeFilter]} (${visible.length} of ${courses.length})`;
+
+  // Course list
+  const listEl = document.getElementById('courseList');
+  const emptyEl = document.getElementById('emptyState');
+
+  if (visible.length === 0) {
+    listEl.innerHTML = '';
+    emptyEl.style.display = 'block';
+    if (courses.length === 0) {
+      document.getElementById('emptyTitle').textContent = 'No courses added yet';
+      document.getElementById('emptyDesc').innerHTML =
+        'Type or paste course numbers above and click <strong>Add Courses</strong>';
+    } else {
+      document.getElementById('emptyTitle').textContent = 'No courses match this filter';
+      document.getElementById('emptyDesc').textContent = 'Click a chip above to change the filter';
+    }
+    return;
+  }
+
+  emptyEl.style.display = 'none';
+  listEl.innerHTML = visible.map(c => {
+    const url = ucfSearchURL(c);
+    return `<div class="course-card" data-status="${c.status}">
+      <span class="course-code">${esc(c.code)}</span>
+
+      <button class="status-pill" data-s="${c.status}"
+        onclick="cycleStatus('${esc(c.code)}')"
+        title="Click to change status">${STATUS_ICON[c.status]} ${STATUS_LABEL[c.status]}</button>
+
+      <input class="sections-input" type="text"
+        value="${esc(c.sections || '')}"
+        placeholder="sects"
+        title="Open sections count"
+        oninput="setSections('${esc(c.code)}', this.value)"
+        onblur="setSections('${esc(c.code)}', this.value)" />
+
+      <input class="notes-input" type="text"
+        value="${esc(c.notes || '')}"
+        placeholder="notes…"
+        oninput="setNotes('${esc(c.code)}', this.value)"
+        onblur="setNotes('${esc(c.code)}', this.value)" />
+
+      <a class="ucf-search-btn" href="${esc(url)}" target="_blank" rel="noopener"
+        title="Open in UCF class search (logged-in portal)">🔍 UCF</a>
+
+      <button class="remove-btn" onclick="removeCourse('${esc(c.code)}')" title="Remove">×</button>
+    </div>`;
+  }).join('');
+}
+
+// ── WIRE UP EVENTS ─────────────────────────────────────────────────────────
+document.getElementById('termSelect').addEventListener('change', function() {
+  activeTerm = this.value;
+  save(); render();
+});
+
+document.getElementById('courseInput').addEventListener('keydown', function(e) {
+  if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); addCourses(); }
+});
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+load();
+document.getElementById('termSelect').value = activeTerm;
+render();
+</script>
+</body>
+</html>
