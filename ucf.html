@@ -31,7 +31,6 @@ body {
   min-height: 100vh;
 }
 
-/* ── HEADER ── */
 header {
   background: var(--ucf-black);
   padding: 0 24px;
@@ -69,10 +68,8 @@ header {
   font-weight: 500;
 }
 
-/* ── LAYOUT ── */
 main { max-width: 980px; margin: 0 auto; padding: 24px 16px 60px; }
 
-/* ── CARDS ── */
 .card {
   background: var(--card);
   border-radius: 12px;
@@ -92,7 +89,6 @@ main { max-width: 980px; margin: 0 auto; padding: 24px 16px 60px; }
   gap: 7px;
 }
 
-/* ── INPUTS ── */
 .form-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 12px; }
 .field { display: flex; flex-direction: column; gap: 4px; }
 .field label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
@@ -131,7 +127,6 @@ textarea {
 textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,201,4,.2); background: #fff; }
 textarea::placeholder { color: #bbb; }
 
-/* ── BUTTONS ── */
 .btn {
   border: none; border-radius: 8px; padding: 8px 16px;
   font-size: 13.5px; font-weight: 600; cursor: pointer;
@@ -146,7 +141,6 @@ textarea::placeholder { color: #bbb; }
 .btn-danger:hover { background: var(--closed-bg); }
 .btn-sm     { padding: 5px 11px; font-size: 12px; border-radius: 6px; }
 
-/* ── SUMMARY CHIPS ── */
 .summary-row { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
 .chip {
   padding: 5px 13px; border-radius: 20px; font-size: 12.5px;
@@ -162,14 +156,12 @@ textarea::placeholder { color: #bbb; }
 .chip-registered { background: var(--registered-bg); color: var(--registered); border-color: var(--registered-border); }
 .chip-unknown  { background: var(--unknown-bg);    color: var(--unknown);    border-color: var(--unknown-border); }
 
-/* ── ACTION BAR ── */
 .action-bar {
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;
 }
 .filter-info { font-size: 12.5px; color: var(--muted); }
 .action-bar-right { margin-left: auto; display: flex; gap: 7px; }
 
-/* ── COURSE CARDS ── */
 .course-list { display: flex; flex-direction: column; gap: 7px; }
 
 .course-card {
@@ -196,7 +188,6 @@ textarea::placeholder { color: #bbb; }
   min-width: 92px; color: var(--black); letter-spacing: -.3px;
 }
 
-/* status toggle button */
 .status-pill {
   padding: 4px 11px; border-radius: 20px; font-size: 11.5px; font-weight: 700;
   cursor: pointer; border: 2px solid transparent; min-width: 110px;
@@ -240,7 +231,6 @@ textarea::placeholder { color: #bbb; }
 }
 .remove-btn:hover { color: var(--closed); }
 
-/* ── EMPTY STATE ── */
 .empty {
   text-align: center; padding: 48px 20px; color: var(--muted);
 }
@@ -248,7 +238,6 @@ textarea::placeholder { color: #bbb; }
 .empty h3   { font-size: 17px; color: #444; margin-bottom: 6px; }
 .empty p    { font-size: 13.5px; }
 
-/* ── HELP SECTION ── */
 .help-row {
   display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px;
   border-top: 1px solid var(--border);
@@ -258,7 +247,6 @@ textarea::placeholder { color: #bbb; }
   padding: 5px 10px; font-size: 12px; color: var(--muted);
 }
 
-/* ── TOAST ── */
 .toast {
   position: fixed; bottom: 22px; right: 22px; background: #1a1a1a; color: #fff;
   padding: 9px 16px; border-radius: 8px; font-size: 13.5px; z-index: 999;
@@ -267,7 +255,6 @@ textarea::placeholder { color: #bbb; }
 }
 .toast.show { opacity: 1; transform: translateY(0); }
 
-/* ── RESPONSIVE ── */
 @media (max-width: 640px) {
   .course-card { flex-wrap: wrap; }
   .course-code { font-size: 14px; min-width: 78px; }
@@ -288,7 +275,6 @@ textarea::placeholder { color: #bbb; }
 
 <main>
 
-  <!-- ── ADD COURSES ── -->
   <div class="card">
     <div class="card-title">📋 Add Courses</div>
     <div class="form-row">
@@ -313,32 +299,28 @@ textarea::placeholder { color: #bbb; }
 
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       <button class="btn btn-gold" onclick="addCourses()">+ Add Courses</button>
-      <button class="btn btn-ghost" onclick="openAllSearches()" title="Opens each course in UCF's class search in separate tabs">🔗 Open All in UCF</button>
+      <button class="btn btn-ghost" onclick="openAllSearches()">🔗 Open All in UCF</button>
       <button class="btn btn-ghost" onclick="exportList()">📋 Copy Summary</button>
       <button class="btn btn-danger btn-sm" onclick="clearAll()" style="margin-left:auto">🗑 Clear All</button>
     </div>
 
     <div class="help-row">
-      <span class="help-pill">Ctrl+Enter to add</span>
-      <span class="help-pill">Click a status pill to cycle it</span>
-      <span class="help-pill">Click a summary chip to filter</span>
-      <span class="help-pill">🔍 opens UCF class search in a new tab</span>
+      <span class="help-pill">Tap a status pill to cycle it</span>
+      <span class="help-pill">Tap a summary chip to filter</span>
+      <span class="help-pill">🔍 opens UCF class search</span>
     </div>
   </div>
 
-  <!-- ── SUMMARY ── -->
   <div class="summary-row" id="summaryRow"></div>
 
-  <!-- ── ACTION BAR ── -->
   <div class="action-bar">
     <span class="filter-info" id="filterInfo"></span>
     <div class="action-bar-right">
       <button class="btn btn-ghost btn-sm" onclick="sortByStatus()">Sort by status</button>
-      <button class="btn btn-ghost btn-sm" onclick="resetStatuses()">Reset all statuses</button>
+      <button class="btn btn-ghost btn-sm" onclick="resetStatuses()">Reset statuses</button>
     </div>
   </div>
 
-  <!-- ── COURSE LIST ── -->
   <div class="course-list" id="courseList"></div>
 
   <div class="empty" id="emptyState" style="display:none">
@@ -352,298 +334,152 @@ textarea::placeholder { color: #bbb; }
 <div class="toast" id="toast"></div>
 
 <script>
-// ── CONSTANTS ──────────────────────────────────────────────────────────────
-const TERMS = {
-  '2258': 'Fall 2025',
-  '2255': 'Summer 2025',
-  '2261': 'Spring 2026',
-  '2265': 'Summer 2026',
-  '2268': 'Fall 2026',
-  '2271': 'Spring 2027',
-};
+const TERMS = {'2258':'Fall 2025','2255':'Summer 2025','2261':'Spring 2026','2265':'Summer 2026','2268':'Fall 2026','2271':'Spring 2027'};
+const STATUSES = ['unknown','open','waitlist','closed','registered'];
+const STATUS_ICON = {unknown:'?',open:'✓',waitlist:'⏳',closed:'✗',registered:'★'};
+const STATUS_LABEL = {unknown:'Unknown',open:'Open',waitlist:'Waitlist',closed:'Full/Closed',registered:'Registered'};
+const SORT_ORDER = {registered:0,open:1,waitlist:2,unknown:3,closed:4};
 
-const STATUSES  = ['unknown', 'open', 'waitlist', 'closed', 'registered'];
-const STATUS_ICON = { unknown: '?', open: '✓', waitlist: '⏳', closed: '✗', registered: '★' };
-const STATUS_LABEL = { unknown: 'Unknown', open: 'Open', waitlist: 'Waitlist', closed: 'Full/Closed', registered: 'Registered' };
-const SORT_ORDER   = { registered: 0, open: 1, waitlist: 2, unknown: 3, closed: 4 };
-
-// ── STATE ──────────────────────────────────────────────────────────────────
-let courses = [];
-let activeTerm = '2268';
-let activeFilter = 'all';
-
-// ── PERSISTENCE ───────────────────────────────────────────────────────────
+let courses = [], activeTerm = '2268', activeFilter = 'all';
 const LS_KEY = 'ucf-class-tracker-v2';
 
-function save() {
-  try { localStorage.setItem(LS_KEY, JSON.stringify({ courses, activeTerm })); } catch(e) {}
-}
+function save() { try { localStorage.setItem(LS_KEY, JSON.stringify({courses,activeTerm})); } catch(e) {} }
+function load() { try { const d = JSON.parse(localStorage.getItem(LS_KEY)||'{}'); courses=d.courses||[]; activeTerm=d.activeTerm||'2268'; } catch(e) {} }
 
-function load() {
-  try {
-    const d = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
-    courses    = d.courses    || [];
-    activeTerm = d.activeTerm || '2268';
-  } catch(e) {}
-}
-
-// ── PARSE COURSE NUMBER ────────────────────────────────────────────────────
 function parseCourse(raw) {
-  const s = raw.trim().toUpperCase().replace(/\s+/g, '');
+  const s = raw.trim().toUpperCase().replace(/\s+/g,'');
   if (!s) return null;
   const m = s.match(/^([A-Z]{2,4})(\d{4}[A-Z]?)$/);
-  if (m) return { code: s, subject: m[1], number: m[2] };
-  if (s.length >= 5) {
-    const letters = s.match(/^[A-Z]+/)?.[0] || '';
-    const digits  = s.slice(letters.length);
-    if (letters.length >= 2 && /^\d{4}/.test(digits))
-      return { code: s, subject: letters, number: digits };
-  }
+  if (m) return {code:s,subject:m[1],number:m[2]};
+  if (s.length>=5) { const l=s.match(/^[A-Z]+/)?.[0]||''; const d=s.slice(l.length); if (l.length>=2&&/^\d{4}/.test(d)) return {code:s,subject:l,number:d}; }
   return null;
 }
 
-// ── URLS ───────────────────────────────────────────────────────────────────
-// Opens the UCF authenticated portal class search for a given course.
-// PeopleSoft accepts these URL params to pre-populate the search form.
 function ucfSearchURL(course) {
-  const base = 'https://csprod-ss.net.ucf.edu/psc/CSPROD/EMPLOYEE/SA/c/COMMUNITY_ACCESS.CLASS_SEARCH.GBL';
-  const p = new URLSearchParams({
-    Page: 'CLASS_SEARCH',
-    Action: 'U',
-    STRM: activeTerm,
-    SUBJECT: course.subject,
-    CATALOG_NBR: course.number,
-  });
-  return `${base}?${p}`;
+  const p = new URLSearchParams({Page:'CLASS_SEARCH',Action:'U',STRM:activeTerm,SUBJECT:course.subject,CATALOG_NBR:course.number});
+  return 'https://csprod-ss.net.ucf.edu/psc/CSPROD/EMPLOYEE/SA/c/COMMUNITY_ACCESS.CLASS_SEARCH.GBL?'+p;
 }
 
-// Public guest access (no login required) as fallback.
-function ucfGuestURL(course) {
-  const base = 'https://my.ucf.edu/psp/IHPROD/GUEST/CSPROD/c/COMMUNITY_ACCESS.CLASS_SEARCH.GBL';
-  const p = new URLSearchParams({
-    Page: 'CLASS_SEARCH',
-    Action: 'U',
-    STRM: activeTerm,
-    SUBJECT: course.subject,
-    CATALOG_NBR: course.number,
-  });
-  return `${base}?${p}`;
-}
-
-// ── ADD COURSES ────────────────────────────────────────────────────────────
 function addCourses() {
   const raw = document.getElementById('courseInput').value;
   const lines = raw.split(/[\n,;]+/);
-  let added = 0, dupes = 0, bad = 0;
-
+  let added=0,dupes=0,bad=0;
   lines.forEach(line => {
     const c = parseCourse(line);
     if (!c) { if (line.trim()) bad++; return; }
-    if (courses.some(x => x.code === c.code)) { dupes++; return; }
-    courses.push({ ...c, status: 'unknown', notes: '', sections: '', id: Date.now() + Math.random() });
+    if (courses.some(x=>x.code===c.code)) { dupes++; return; }
+    courses.push({...c,status:'unknown',notes:'',sections:'',id:Date.now()+Math.random()});
     added++;
   });
-
-  document.getElementById('courseInput').value = '';
-  save();
-  render();
-
-  const parts = [];
-  if (added)  parts.push(`${added} course${added !== 1 ? 's' : ''} added`);
-  if (dupes)  parts.push(`${dupes} duplicate${dupes !== 1 ? 's' : ''} skipped`);
-  if (bad)    parts.push(`${bad} unrecognized`);
-  toast(parts.join(' · ') || 'Nothing to add');
-}
-
-// ── REMOVE ─────────────────────────────────────────────────────────────────
-function removeCourse(code) {
-  courses = courses.filter(c => c.code !== code);
+  document.getElementById('courseInput').value='';
   save(); render();
+  const parts=[];
+  if (added) parts.push(added+' course'+(added!==1?'s':'')+' added');
+  if (dupes) parts.push(dupes+' duplicate'+(dupes!==1?'s':'')+' skipped');
+  if (bad) parts.push(bad+' unrecognized');
+  toast(parts.join(' · ')||'Nothing to add');
 }
 
-// ── STATUS CYCLE ───────────────────────────────────────────────────────────
+function removeCourse(code) { courses=courses.filter(c=>c.code!==code); save(); render(); }
+
 function cycleStatus(code) {
-  const c = courses.find(x => x.code === code);
-  if (!c) return;
-  c.status = STATUSES[(STATUSES.indexOf(c.status) + 1) % STATUSES.length];
+  const c=courses.find(x=>x.code===code); if (!c) return;
+  c.status=STATUSES[(STATUSES.indexOf(c.status)+1)%STATUSES.length];
   save(); render();
 }
 
-// ── NOTES / SECTIONS ──────────────────────────────────────────────────────
-function setNotes(code, val) {
-  const c = courses.find(x => x.code === code); if (c) c.notes = val; save();
-}
-function setSections(code, val) {
-  const c = courses.find(x => x.code === code); if (c) c.sections = val; save();
-}
+function setNotes(code,val) { const c=courses.find(x=>x.code===code); if(c) c.notes=val; save(); }
+function setSections(code,val) { const c=courses.find(x=>x.code===code); if(c) c.sections=val; save(); }
 
-// ── OPEN ALL ───────────────────────────────────────────────────────────────
 function openAllSearches() {
-  const list = visibleCourses();
+  const list=visibleCourses();
   if (!list.length) { toast('No courses to open'); return; }
-  if (list.length > 12 && !confirm(`Open ${list.length} tabs? Your browser may block some.`)) return;
-  list.forEach(c => window.open(ucfSearchURL(c), '_blank'));
+  if (list.length>12&&!confirm('Open '+list.length+' tabs?')) return;
+  list.forEach(c=>window.open(ucfSearchURL(c),'_blank'));
 }
 
-// ── CLEAR ──────────────────────────────────────────────────────────────────
 function clearAll() {
   if (!courses.length) return;
   if (!confirm('Remove all courses?')) return;
-  courses = []; activeFilter = 'all'; save(); render(); toast('Cleared');
+  courses=[]; activeFilter='all'; save(); render(); toast('Cleared');
 }
 
-// ── SORT ───────────────────────────────────────────────────────────────────
 function sortByStatus() {
-  courses.sort((a, b) => (SORT_ORDER[a.status] ?? 3) - (SORT_ORDER[b.status] ?? 3));
+  courses.sort((a,b)=>(SORT_ORDER[a.status]??3)-(SORT_ORDER[b.status]??3));
   save(); render(); toast('Sorted by status');
 }
 
-// ── RESET ──────────────────────────────────────────────────────────────────
-function resetStatuses() {
-  courses.forEach(c => c.status = 'unknown');
-  save(); render(); toast('All statuses reset');
-}
+function resetStatuses() { courses.forEach(c=>c.status='unknown'); save(); render(); toast('All statuses reset'); }
 
-// ── EXPORT ─────────────────────────────────────────────────────────────────
 function exportList() {
   if (!courses.length) { toast('No courses to copy'); return; }
-  const term = TERMS[activeTerm] || activeTerm;
-  const lines = [`UCF Class Status — ${term}`, ''];
-  const groups = ['registered', 'open', 'waitlist', 'unknown', 'closed'];
-  groups.forEach(s => {
-    const group = courses.filter(c => c.status === s);
+  const term=TERMS[activeTerm]||activeTerm;
+  const lines=['UCF Class Status — '+term,''];
+  ['registered','open','waitlist','unknown','closed'].forEach(s=>{
+    const group=courses.filter(c=>c.status===s);
     if (!group.length) return;
-    lines.push(`── ${STATUS_ICON[s]} ${STATUS_LABEL[s].toUpperCase()} ──`);
-    group.forEach(c => {
-      const extra = [c.sections && `${c.sections} sections`, c.notes].filter(Boolean).join(' — ');
-      lines.push(`  ${c.code}${extra ? '  ' + extra : ''}`);
-    });
+    lines.push('── '+STATUS_ICON[s]+' '+STATUS_LABEL[s].toUpperCase()+' ──');
+    group.forEach(c=>{ const extra=[c.sections&&c.sections+' sections',c.notes].filter(Boolean).join(' — '); lines.push('  '+c.code+(extra?'  '+extra:'')); });
     lines.push('');
   });
-  navigator.clipboard.writeText(lines.join('\n'))
-    .then(() => toast('Copied to clipboard ✓'))
-    .catch(() => toast('Copy failed — try selecting manually'));
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>toast('Copied ✓')).catch(()=>toast('Copy failed'));
 }
 
-// ── FILTER ─────────────────────────────────────────────────────────────────
-function setFilter(s) {
-  activeFilter = (activeFilter === s) ? 'all' : s;
-  render();
-}
+function setFilter(s) { activeFilter=(activeFilter===s)?'all':s; render(); }
+function visibleCourses() { return activeFilter==='all'?courses:courses.filter(c=>c.status===activeFilter); }
 
-function visibleCourses() {
-  return activeFilter === 'all' ? courses : courses.filter(c => c.status === activeFilter);
-}
-
-// ── TOAST ──────────────────────────────────────────────────────────────────
 let toastTimer;
 function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),2800);
 }
 
-// ── RENDER ─────────────────────────────────────────────────────────────────
-function esc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 function render() {
-  // Header term
-  document.getElementById('headerTerm').textContent = TERMS[activeTerm] || '';
-
-  // Sync term select
-  document.getElementById('termSelect').value = activeTerm;
-
-  // Counts
-  const cnt = { open: 0, waitlist: 0, closed: 0, registered: 0, unknown: 0 };
-  courses.forEach(c => cnt[c.status] = (cnt[c.status] || 0) + 1);
-
-  // Summary chips
-  document.getElementById('summaryRow').innerHTML = [
-    ['all',        'chip-all',        `📚 All: ${courses.length}`],
-    ['open',       'chip-open',       `✓ Open: ${cnt.open}`],
-    ['waitlist',   'chip-waitlist',   `⏳ Waitlist: ${cnt.waitlist}`],
-    ['closed',     'chip-closed',     `✗ Closed: ${cnt.closed}`],
-    ['registered', 'chip-registered', `★ Registered: ${cnt.registered}`],
-    ['unknown',    'chip-unknown',    `? Unknown: ${cnt.unknown}`],
-  ].map(([key, cls, label]) =>
-    `<div class="chip ${cls}${activeFilter === key ? ' active' : ''}" onclick="setFilter('${key}')">${label}</div>`
-  ).join('');
-
-  // Visible courses
-  const visible = visibleCourses();
-
-  // Filter info
-  document.getElementById('filterInfo').textContent =
-    activeFilter === 'all'
-      ? `${courses.length} course${courses.length !== 1 ? 's' : ''} total`
-      : `Showing: ${STATUS_LABEL[activeFilter]} (${visible.length} of ${courses.length})`;
-
-  // Course list
-  const listEl = document.getElementById('courseList');
-  const emptyEl = document.getElementById('emptyState');
-
-  if (visible.length === 0) {
-    listEl.innerHTML = '';
-    emptyEl.style.display = 'block';
-    if (courses.length === 0) {
-      document.getElementById('emptyTitle').textContent = 'No courses added yet';
-      document.getElementById('emptyDesc').innerHTML =
-        'Type or paste course numbers above and click <strong>Add Courses</strong>';
-    } else {
-      document.getElementById('emptyTitle').textContent = 'No courses match this filter';
-      document.getElementById('emptyDesc').textContent = 'Click a chip above to change the filter';
-    }
+  document.getElementById('headerTerm').textContent=TERMS[activeTerm]||'';
+  document.getElementById('termSelect').value=activeTerm;
+  const cnt={open:0,waitlist:0,closed:0,registered:0,unknown:0};
+  courses.forEach(c=>cnt[c.status]=(cnt[c.status]||0)+1);
+  document.getElementById('summaryRow').innerHTML=[
+    ['all','chip-all','📚 All: '+courses.length],
+    ['open','chip-open','✓ Open: '+cnt.open],
+    ['waitlist','chip-waitlist','⏳ Waitlist: '+cnt.waitlist],
+    ['closed','chip-closed','✗ Closed: '+cnt.closed],
+    ['registered','chip-registered','★ Registered: '+cnt.registered],
+    ['unknown','chip-unknown','? Unknown: '+cnt.unknown],
+  ].map(([key,cls,label])=>'<div class="chip '+cls+(activeFilter===key?' active':''+'"')+' onclick="setFilter(\''+key+'\')">'+'</div>').join('');
+  const visible=visibleCourses();
+  document.getElementById('filterInfo').textContent=activeFilter==='all'?courses.length+' course'+(courses.length!==1?'s':'')+' total':'Showing: '+STATUS_LABEL[activeFilter]+' ('+visible.length+' of '+courses.length+')';
+  const listEl=document.getElementById('courseList');
+  const emptyEl=document.getElementById('emptyState');
+  if (visible.length===0) {
+    listEl.innerHTML='';
+    emptyEl.style.display='block';
+    document.getElementById('emptyTitle').textContent=courses.length===0?'No courses added yet':'No courses match this filter';
+    document.getElementById('emptyDesc').innerHTML=courses.length===0?'Type or paste course numbers above and click <strong>Add Courses</strong>':'Tap a chip above to change the filter';
     return;
   }
-
-  emptyEl.style.display = 'none';
-  listEl.innerHTML = visible.map(c => {
-    const url = ucfSearchURL(c);
-    return `<div class="course-card" data-status="${c.status}">
-      <span class="course-code">${esc(c.code)}</span>
-
-      <button class="status-pill" data-s="${c.status}"
-        onclick="cycleStatus('${esc(c.code)}')"
-        title="Click to change status">${STATUS_ICON[c.status]} ${STATUS_LABEL[c.status]}</button>
-
-      <input class="sections-input" type="text"
-        value="${esc(c.sections || '')}"
-        placeholder="sects"
-        title="Open sections count"
-        oninput="setSections('${esc(c.code)}', this.value)"
-        onblur="setSections('${esc(c.code)}', this.value)" />
-
-      <input class="notes-input" type="text"
-        value="${esc(c.notes || '')}"
-        placeholder="notes…"
-        oninput="setNotes('${esc(c.code)}', this.value)"
-        onblur="setNotes('${esc(c.code)}', this.value)" />
-
-      <a class="ucf-search-btn" href="${esc(url)}" target="_blank" rel="noopener"
-        title="Open in UCF class search (logged-in portal)">🔍 UCF</a>
-
-      <button class="remove-btn" onclick="removeCourse('${esc(c.code)}')" title="Remove">×</button>
-    </div>`;
+  emptyEl.style.display='none';
+  listEl.innerHTML=visible.map(c=>{
+    const url=ucfSearchURL(c);
+    return '<div class="course-card" data-status="'+c.status+'">'+
+      '<span class="course-code">'+esc(c.code)+'</span>'+
+      '<button class="status-pill" data-s="'+c.status+'" onclick="cycleStatus(\''+esc(c.code)+'\')" title="Tap to change status">'+STATUS_ICON[c.status]+' '+STATUS_LABEL[c.status]+'</button>'+
+      '<input class="sections-input" type="text" value="'+esc(c.sections||'')+'" placeholder="sects" oninput="setSections(\''+esc(c.code)+'\',this.value)" onblur="setSections(\''+esc(c.code)+'\',this.value)" />'+
+      '<input class="notes-input" type="text" value="'+esc(c.notes||'')+'" placeholder="notes…" oninput="setNotes(\''+esc(c.code)+'\',this.value)" onblur="setNotes(\''+esc(c.code)+'\',this.value)" />'+
+      '<a class="ucf-search-btn" href="'+esc(url)+'" target="_blank" rel="noopener">🔍 UCF</a>'+
+      '<button class="remove-btn" onclick="removeCourse(\''+esc(c.code)+'\')" title="Remove">×</button>'+
+      '</div>';
   }).join('');
 }
 
-// ── WIRE UP EVENTS ─────────────────────────────────────────────────────────
-document.getElementById('termSelect').addEventListener('change', function() {
-  activeTerm = this.value;
-  save(); render();
-});
+document.getElementById('termSelect').addEventListener('change',function(){activeTerm=this.value;save();render();});
+document.getElementById('courseInput').addEventListener('keydown',function(e){if(e.ctrlKey&&e.key==='Enter'){e.preventDefault();addCourses();}});
 
-document.getElementById('courseInput').addEventListener('keydown', function(e) {
-  if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); addCourses(); }
-});
-
-// ── INIT ───────────────────────────────────────────────────────────────────
 load();
-document.getElementById('termSelect').value = activeTerm;
+document.getElementById('termSelect').value=activeTerm;
 render();
 </script>
 </body>
